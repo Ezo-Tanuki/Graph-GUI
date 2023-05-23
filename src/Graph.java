@@ -4,19 +4,19 @@ import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.Set;
 import javax.swing.JPanel;
 
 public class Graph extends JPanel{
-    private LinkedList<Node> nodes;
+    private ArrayList<Node> nodes;
     private Set<Set<Node>> edges;
 
     public Graph(){
         // super();
-        this.nodes = new LinkedList<>();
+        this.nodes = new ArrayList<>(20);
         this.setLayout(null);
         this.setBackground(Color.WHITE);
         this.setPreferredSize(new Dimension(500, 500));
@@ -39,15 +39,15 @@ public class Graph extends JPanel{
     
     public void paint(Graphics g){
         
+        
         //Set anti-aliasing
         Graphics2D g2 = (Graphics2D)g;
         RenderingHints rh = new RenderingHints(
-                 RenderingHints.KEY_TEXT_ANTIALIASING,
-                 RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
+                 RenderingHints.KEY_ANTIALIASING,
+                 RenderingHints.VALUE_ANTIALIAS_ON);
         g2.setRenderingHints(rh);
 
-        // Draw components including nodes
-        super.paint(g2);
+        this.paintComponent(g2);
 
         if(this.edges.isEmpty()) return;
 
@@ -61,6 +61,10 @@ public class Graph extends JPanel{
             obj2 = (Node) it.next();
             g2.drawLine(obj1.getX() + obj1.getRadius(), obj1.getY() + obj1.getRadius(), obj2.getX() + obj2.getRadius(), obj2.getY() + obj2.getRadius());
         }
+
+        // Draw components including nodes
+        // super.paint(g2);
+        this.paintChildren(g2);
 
         this.repaint();
 
