@@ -30,7 +30,11 @@ public class Node extends JPanel{
     private LinkedList<Node> connectedNodes;
 
     public Node(){
-        this(50, 50, 100);
+        this(0, 0);
+    }
+
+    public Node(int x, int y){
+        this(x, y, 40);
     }
 
     public Node(int x, int y, int radius){
@@ -161,7 +165,7 @@ public class Node extends JPanel{
             // setX(x + dx);
             // setY(y + dy);
             // System.out.println(getBounds().x + " " + getBounds().y);
-            setLocation(getBounds().x + dx, getBounds().y + dy);
+            setLocation(Math.max(getBounds().x + dx, 0), Math.max(getBounds().y + dy, 0));
             
             prevPt = new Point((int) prevPt.getX() + dx, (int) prevPt.getY() + dy);
         }
