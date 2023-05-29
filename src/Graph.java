@@ -52,7 +52,6 @@ public class Graph extends JPanel implements KeyListener, MouseListener, MouseMo
         this.addMouseListener(this);
         this.addMouseMotionListener(this);
         this.add(this.label);
-        
     }
 
     public void editMode(MouseEvent e){
@@ -65,7 +64,7 @@ public class Graph extends JPanel implements KeyListener, MouseListener, MouseMo
 
                 Component nextComponent = this.getComponentAt(e.getPoint());
                 
-                if(nextComponent instanceof Node){
+                if((nextComponent instanceof Node) && nextComponent != this.focusedComponent){
                     this.connectNode((Node) this.focusedComponent, (Node) nextComponent);
                     this.setFocusedComponent(null);
                 }
@@ -99,18 +98,18 @@ public class Graph extends JPanel implements KeyListener, MouseListener, MouseMo
 
         this.paintComponent(g2);
 
-        if(this.edges.isEmpty()) return;
+        if(!this.edges.isEmpty()){
+            // Draw edges
+            g2.setStroke(new BasicStroke(2));
+            for(Set<Node> sets : this.edges){
+                Node obj1, obj2;
+                Iterator<Node> it = sets.iterator();
 
-        // Draw edges
-        g2.setStroke(new BasicStroke(2));
-        for(Set<Node> sets : this.edges){
-            Node obj1, obj2;
-            Iterator<Node> it = sets.iterator();
-
-            obj1 = (Node) it.next();
-            obj2 = (Node) it.next();
-            g2.drawLine(obj1.getX() + obj1.getRadius(), obj1.getY() + obj1.getRadius(), obj2.getX() + obj2.getRadius(), obj2.getY() + obj2.getRadius());
-        }
+                obj1 = (Node) it.next();
+                obj2 = (Node) it.next();
+                g2.drawLine(obj1.getX() + obj1.getRadius(), obj1.getY() + obj1.getRadius(), obj2.getX() + obj2.getRadius(), obj2.getY() + obj2.getRadius());
+            }
+        }  
 
         // Draw components including nodes
         // super.paint(g2);
@@ -139,6 +138,10 @@ public class Graph extends JPanel implements KeyListener, MouseListener, MouseMo
 
     private void setFocusedComponent(Component c){
         this.focusedComponent = c;
+    }
+
+    private void saveProc(){
+        
     }
 
     @Override
@@ -181,6 +184,9 @@ public class Graph extends JPanel implements KeyListener, MouseListener, MouseMo
                 case 77: //m
                     this.mode = "Move";
                     break;
+
+                case 83: //s
+                this.saveProc();
             }
             System.out.println("Mode set to " + this.mode);
             this.updateLabel();
