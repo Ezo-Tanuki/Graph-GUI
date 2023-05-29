@@ -16,6 +16,13 @@ public class Frame extends JFrame {
         // this.addKeyListener(this);
 
         this.mode = "edit";
+
+        Graph g = new Graph();
+        this.add(g);
+
+        g.setFocusable(true);
+        g.requestFocusInWindow();
+
     }
 
     // public void paint(Graphics g){
