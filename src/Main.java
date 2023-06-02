@@ -1,16 +1,6 @@
-import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.Point;
-import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
-import java.util.zip.GZIPOutputStream;
-
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-
 public class Main {
     public static void main(String[] args) {
-        Frame gr = new Frame();
+        new Frame();
         // JLabel label = new JLabel("Mode");
         // label.setBackground(Color.BLACK);
         // label.setBounds(0, 0, 100, 100);

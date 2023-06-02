@@ -20,6 +20,7 @@ import java.util.Set;
 
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.event.DocumentEvent;
 
 public class Graph extends JPanel implements KeyListener, MouseListener, MouseMotionListener{
     private ArrayList<Node> nodes;
@@ -27,20 +28,22 @@ public class Graph extends JPanel implements KeyListener, MouseListener, MouseMo
     private int size;
     private Set<Set<Node>> edges;
     private String mode;
-    private JLabel label;
+    private JLabel modeLabel;
+    private JLabel actionLabel;
+    private Point mouseLocation;
     private Point prevPt;
     private Component focusedComponent;
     private char latestKeyPressed;
 
-    public Graph(){
+    public Graph() {
         // super();
         this.nodes = new ArrayList<>(20);
         this.size = 0;
         this.edges = new HashSet<>();
         this.mode = "Edit";
-        this.label = new JLabel("Mode: " + this.mode);
-        this.label.setBounds(0, 0, 100, 10);
-        // this.label.setOpaque(true);
+        this.modeLabel = new JLabel("Mode: " + this.mode);
+        this.modeLabel.setBounds(0, 0, 100, 10);
+        // this.modeLabel.setOpaque(true);
 
         this.setLayout(null);
         this.setBackground(Color.WHITE);
@@ -51,12 +54,12 @@ public class Graph extends JPanel implements KeyListener, MouseListener, MouseMo
         this.addKeyListener(this);
         this.addMouseListener(this);
         this.addMouseMotionListener(this);
-        this.add(this.label);
+        this.add(this.modeLabel);
     }
 
-    public void editMode(MouseEvent e){
+    public void editMode(MouseEvent e) {
         switch(this.latestKeyPressed){
-            case 'c':
+            case 'c': //connect
                 if(!(this.focusedComponent instanceof Node)){
                     this.focusedComponent = this.getComponentAt(e.getPoint());
                     return;
@@ -68,25 +71,70 @@ public class Graph extends JPanel implements KeyListener, MouseListener, MouseMo
                     this.connectNode((Node) this.focusedComponent, (Node) nextComponent);
                     this.setFocusedComponent(null);
                 }
+                break;
 
-        }
+            case 'r': //remove
+                if(!(this.getComponentAt(e.getPoint()) instanceof Node)) return;
+                this.removeNode((Node) this.getComponentAt(e.getPoint()));
+                this.focusedComponent = null;
+                // this.remove(this.getComponentAt(e.getPoint()));
+                break;
+
+            case 'd': //disconnect
+                if(!(this.focusedComponent instanceof Node)){
+                    this.focusedComponent = this.getComponentAt(e.getPoint());
+                    return;
+                }
+
+                Component nextComponent2 = this.getComponentAt(e.getPoint());
+                
+                if((nextComponent2 instanceof Node) && nextComponent2 != this.focusedComponent){
+                    this.disconnectNode((Node) this.focusedComponent, (Node) nextComponent2);
+                    this.setFocusedComponent(null);
+                }
+                break;
+        
+            }
     }
 
-    public void connectNode(Node obj1, Node obj2){
+    public void connectNode(Node obj1, Node obj2) {
+        obj1.addConnection(obj2);
+        obj2.addConnection(obj1);
+
         Set<Node> newSet = new HashSet<>(2);
         newSet.add(obj1);
         newSet.add(obj2);
         this.edges.add(newSet);
     }
 
-    public void insertNode(Node n){
+    public void disconnectNode(Node obj1, Node obj2) {
+        Set<Node> edge = new HashSet<>(2);
+        edge.add(obj1);
+        edge.add(obj2);
+        this.edges.remove(edge);        
+    }
+
+    public void insertNode(Node n) {
         this.nodes.add(n);
         this.add(n);
         this.size++;
     }
+
+    public void removeNode(Node n) {
+        this.nodes.remove(n);
+        this.remove(n);
+        this.size--;
+        LinkedList<Node> adjacentNodes = n.getConnectedNodes();
+
+        if(adjacentNodes == null) return;
+        for(Node node : adjacentNodes){
+            this.disconnectNode(n, node);
+        }
+
+    }
     
     
-    public void paint(Graphics g){
+    public void paint(Graphics g) {
         
         
         //Set anti-aliasing
@@ -132,16 +180,16 @@ public class Graph extends JPanel implements KeyListener, MouseListener, MouseMo
     //     }
     }
 
-    private void updateLabel(){
-        this.label.setText("Mode: " + this.mode);
+    private void updateLabel() {
+        this.modeLabel.setText("Mode: " + this.mode);
     }
 
-    private void setFocusedComponent(Component c){
+    private void setFocusedComponent(Component c) {
         this.focusedComponent = c;
     }
 
-    private void saveProc(){
-        
+    private void saveProc() {
+
     }
 
     @Override
@@ -154,7 +202,7 @@ public class Graph extends JPanel implements KeyListener, MouseListener, MouseMo
                 // System.out.println("hhh");
                 switch(Character.toLowerCase(e.getKeyChar())){
                     case 'a':
-                        this.insertNode(new Node());
+                        this.insertNode(new Node(this.mouseLocation));
                         break;
                     
                 }
@@ -168,8 +216,8 @@ public class Graph extends JPanel implements KeyListener, MouseListener, MouseMo
     public void keyPressed(KeyEvent e) {
         // TODO Auto-generated method stub
         // throw new UnsupportedOperationException("Unimplemented method 'keyPressed'");
-        
         this.latestKeyPressed = e.getKeyChar();
+        this.focusedComponent = null;
 
         System.out.println(e.getKeyCode() + " " + e.getModifiersEx());
         if(e.getModifiersEx() == 128){ //ctrl
@@ -285,6 +333,7 @@ public class Graph extends JPanel implements KeyListener, MouseListener, MouseMo
 
     @Override
     public void mouseMoved(MouseEvent e) {
+        this.mouseLocation = new Point(e.getX(), e.getY());
         // TODO Auto-generated method stub
         // throw new UnsupportedOperationException("Unimplemented method 'mouseMoved'");
     }

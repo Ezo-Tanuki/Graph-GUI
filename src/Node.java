@@ -27,26 +27,28 @@ public class Node extends JPanel{
     
     private LinkedList<Node> connectedNodes;
 
-    public Node(){
+    public Node() {
         this(new Point(0, 0));
     }
 
-    public Node(Point pt){
+    public Node(Point pt) {
         this(pt, 40);
     }
 
-    public Node(Point pt, int radius){
-
+    public Node(Point pt, int radius) {
+        pt.translate(-radius, -radius);
         this.setLocation(pt);
         this.setRadius(radius);
         this.setOpaque(false);
         this.setLayout(null);
+        this.connectedNodes = new LinkedList<>();
 
         this.margin = radius / 20;
-        this.setBounds(this.getX(), this.getY(), this.radius * 2 + this.margin, this.radius * 2 + this.margin);
+        this.setSize(this.radius * 2 + this.margin, this.radius * 2 + this.margin);
+        // this.setBounds(this.getX(), this.getY(), this.radius * 2 + this.margin, this.radius * 2 + this.margin);
     }
 
-    public void paint(Graphics g){
+    public void paint(Graphics g) {
         super.paint(g);
 
         //Set anti-aliasing to on
@@ -115,5 +117,9 @@ public class Node extends JPanel{
 
     public void setConnectedNodes(LinkedList<Node> connectedNodes) {
         this.connectedNodes = connectedNodes;
+    }
+
+    public void addConnection(Node n) {
+        this.connectedNodes.add(n);
     }
 }
