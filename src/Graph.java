@@ -12,6 +12,8 @@ import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -159,6 +161,11 @@ public class Graph extends JPanel implements KeyListener, MouseListener, MouseMo
             }
         }  
 
+        if(this.mode.equals("Edit") && this.latestKeyPressed == 'c' && this.focusedComponent instanceof Node){ 
+            Node node = (Node) this.focusedComponent;
+            Point centerPoint = node.getCenterPoint();
+            g2.drawLine(centerPoint.x, centerPoint.y, this.mouseLocation.x, this.mouseLocation.y);
+        }
         // Draw components including nodes
         // super.paint(g2);
         this.paintChildren(g2);
@@ -189,7 +196,13 @@ public class Graph extends JPanel implements KeyListener, MouseListener, MouseMo
     }
 
     private void saveProc() {
-
+        try {
+            FileWriter writer = new FileWriter("./test/poem.txt");
+            writer.write("lll");
+            writer.close();
+        } catch (IOException e) {
+            // TODO: handle exception
+        }
     }
 
     @Override
@@ -234,12 +247,12 @@ public class Graph extends JPanel implements KeyListener, MouseListener, MouseMo
                     break;
 
                 case 83: //s
-                this.saveProc();
+                    this.saveProc();
+                    break;
             }
             System.out.println("Mode set to " + this.mode);
             this.updateLabel();
             this.setFocusedComponent(null);
-            return;
         }
     }
 

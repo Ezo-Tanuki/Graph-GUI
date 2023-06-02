@@ -1,6 +1,21 @@
+import javax.swing.SwingUtilities;
+
+class SwingDemo implements Runnable {
+    private Frame frame;
+
+    @Override
+    public void run() {
+        this.frame = new Frame();
+
+         // setSize(), add components, etc
+
+    }
+}
+
+
 public class Main {
     public static void main(String[] args) {
-        new Frame();
+        SwingUtilities.invokeLater(new SwingDemo());
         // JLabel label = new JLabel("Mode");
         // label.setBackground(Color.BLACK);
         // label.setBounds(0, 0, 100, 100);

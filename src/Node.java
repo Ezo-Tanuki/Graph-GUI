@@ -1,4 +1,5 @@
 import java.awt.BasicStroke;
+import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
@@ -6,6 +7,7 @@ import java.awt.Point;
 import java.awt.RenderingHints;
 import java.util.LinkedList;
 
+import javax.swing.JLabel;
 import javax.swing.JPanel;
 
 public class Node extends JPanel{
@@ -15,7 +17,6 @@ public class Node extends JPanel{
     Point prevPt;
 
     private int radius;
-    private int id;
     private int margin;
 
     private Color fillColor;
@@ -37,19 +38,31 @@ public class Node extends JPanel{
 
     public Node(Point pt, int radius) {
         pt.translate(-radius, -radius);
-        this.setLocation(pt);
+
         this.setRadius(radius);
         this.setOpaque(false);
-        this.setLayout(null);
+        this.setLayout(new BorderLayout());
         this.connectedNodes = new LinkedList<>();
 
+
+
         this.margin = radius / 20;
-        this.setSize(this.radius * 2 + this.margin, this.radius * 2 + this.margin);
+        this.setLocation(pt);
+        this.setSize(this.radius * 2 + this.margin, this.radius * 2 + this.margin);  
+        
+        JLabel label = new JLabel();
+ 
+        label.setHorizontalAlignment(JLabel.CENTER);
+        label.setVerticalAlignment(JLabel.CENTER);
+               
+        this.add(label);
+        label.setText("ff");
+        this.setVisible(true);    
         // this.setBounds(this.getX(), this.getY(), this.radius * 2 + this.margin, this.radius * 2 + this.margin);
     }
 
     public void paint(Graphics g) {
-        super.paint(g);
+        // super.paint(g);
 
         //Set anti-aliasing to on
         Graphics2D g2D = (Graphics2D)g;
@@ -69,6 +82,8 @@ public class Node extends JPanel{
         //Set border color
         g2D.setColor(Color.BLACK);
         g2D.drawOval(this.margin / 2, this.margin / 2, this.getRadius() * 2, this.getRadius() * 2);
+
+        this.paintComponents(g2D);
     }
 
     public int getRadius() {
@@ -109,6 +124,12 @@ public class Node extends JPanel{
 
     public void setIdentifier(String identifier) {
         this.identifier = identifier;
+    }
+
+    public Point getCenterPoint() {
+        Point pt = this.getLocation();
+        pt.translate(radius, radius);
+        return pt;
     }
 
     public LinkedList<Node> getConnectedNodes() {
