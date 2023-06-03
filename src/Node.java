@@ -1,20 +1,28 @@
 import java.awt.BasicStroke;
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Point;
 import java.awt.RenderingHints;
 import java.util.LinkedList;
+import java.util.Set;
+import java.util.TreeSet;
 
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
 public class Node extends JPanel{
-    // private volatile int x;
-    // private volatile int y;
+    private static Set<Integer> defaultNumber;   
     
+    static {
+        defaultNumber = new TreeSet<>();
+    }
+
     Point prevPt;
+
+
 
     private int radius;
     private int margin;
@@ -33,10 +41,30 @@ public class Node extends JPanel{
     }
 
     public Node(Point pt) {
-        this(pt, 40);
+        this(pt, 40, null);
     }
 
-    public Node(Point pt, int radius) {
+    public Node(Point pt, int radius, String identifier) {
+        if(identifier == null){
+            for(int i = 0; i < Integer.MAX_VALUE; i++){
+                if(!defaultNumber.contains(i)){
+                    identifier = Integer.toString(i);
+                    defaultNumber.add(i);
+                    break;
+                }
+            }
+        }
+
+        else{
+            identifier = identifier.strip();
+            try {
+                int number = Integer.parseInt(identifier);
+                defaultNumber.add(number);
+            } catch (NumberFormatException e) {
+                System.out.println("Identifier is not a number");
+            }
+        }
+
         pt.translate(-radius, -radius);
 
         this.setRadius(radius);
@@ -44,9 +72,10 @@ public class Node extends JPanel{
         this.setLayout(new BorderLayout());
         this.connectedNodes = new LinkedList<>();
 
+        this.setIdentifier(identifier);
 
 
-        this.margin = radius / 20;
+        this.margin = Math.max(radius / 20, 3);
         this.setLocation(pt);
         this.setSize(this.radius * 2 + this.margin, this.radius * 2 + this.margin);  
         
@@ -54,16 +83,13 @@ public class Node extends JPanel{
  
         label.setHorizontalAlignment(JLabel.CENTER);
         label.setVerticalAlignment(JLabel.CENTER);
-               
-        this.add(label);
-        label.setText("ff");
-        this.setVisible(true);    
-        // this.setBounds(this.getX(), this.getY(), this.radius * 2 + this.margin, this.radius * 2 + this.margin);
+        this.setVisible(true);     
+        label.setText(this.identifier);   
+        label.setFont(new Font("Verdana", Font.PLAIN, this.radius * 3/5)); //0.6 * radius
+        this.add(label);   
     }
 
     public void paint(Graphics g) {
-        // super.paint(g);
-
         //Set anti-aliasing to on
         Graphics2D g2D = (Graphics2D)g;
         RenderingHints rh = new RenderingHints(

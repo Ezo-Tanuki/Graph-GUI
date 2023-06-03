@@ -1,7 +1,6 @@
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Component;
-import java.awt.Dimension;
 import java.awt.event.KeyEvent;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
@@ -12,6 +11,10 @@ import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -20,83 +23,103 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Set;
 
+import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
-import javax.swing.event.DocumentEvent;
 
-public class Graph extends JPanel implements KeyListener, MouseListener, MouseMotionListener{
+public class Graph extends JPanel implements KeyListener, MouseListener, MouseMotionListener {
     private ArrayList<Node> nodes;
-    private LinkedList<Node> focusedNodes;
     private int size;
     private Set<Set<Node>> edges;
+
     private String mode;
     private JLabel modeLabel;
+    private String action;
     private JLabel actionLabel;
+
     private Point mouseLocation;
     private Point prevPt;
+
+    private File targetFile;
     private Component focusedComponent;
     private char latestKeyPressed;
 
     public Graph() {
-        // super();
         this.nodes = new ArrayList<>(20);
         this.size = 0;
         this.edges = new HashSet<>();
+
+        this.targetFile = null;
+
         this.mode = "Edit";
         this.modeLabel = new JLabel("Mode: " + this.mode);
-        this.modeLabel.setBounds(0, 0, 100, 10);
-        // this.modeLabel.setOpaque(true);
+        this.modeLabel.setBounds(10, 10, 150, 10);
+
+        this.action = null;
+        this.actionLabel = new JLabel("Action: " + (this.action == null ? "None" : this.action));
+        this.actionLabel.setBounds(10, 25, 150, 10);
 
         this.setLayout(null);
         this.setBackground(Color.WHITE);
-        // this.setPreferredSize(new Dimension(500, 500));
-        // this.setBounds(0, 0, 500, 500);
         this.setLocation(0, 0);
-        this.setSize(Toolkit.getDefaultToolkit().getScreenSize());;
+        this.setSize(Toolkit.getDefaultToolkit().getScreenSize());
+        ;
+
         this.addKeyListener(this);
         this.addMouseListener(this);
         this.addMouseMotionListener(this);
         this.add(this.modeLabel);
+        this.add(this.actionLabel);
+    }
+
+    public void reset() {
+        for (Node node : this.nodes) {
+            this.remove(node);
+        }
+
+        this.nodes = new ArrayList<>(20);
+        this.size = 0;
+        this.edges = new HashSet<>();
     }
 
     public void editMode(MouseEvent e) {
-        switch(this.latestKeyPressed){
-            case 'c': //connect
-                if(!(this.focusedComponent instanceof Node)){
+        switch (this.latestKeyPressed) {
+            case 'c': // connect
+                if (!(this.focusedComponent instanceof Node)) {
                     this.focusedComponent = this.getComponentAt(e.getPoint());
                     return;
                 }
 
                 Component nextComponent = this.getComponentAt(e.getPoint());
-                
-                if((nextComponent instanceof Node) && nextComponent != this.focusedComponent){
+
+                if ((nextComponent instanceof Node) && nextComponent != this.focusedComponent) {
                     this.connectNode((Node) this.focusedComponent, (Node) nextComponent);
                     this.setFocusedComponent(null);
                 }
                 break;
 
-            case 'r': //remove
-                if(!(this.getComponentAt(e.getPoint()) instanceof Node)) return;
+            case 'r': // remove
+                if (!(this.getComponentAt(e.getPoint()) instanceof Node))
+                    return;
                 this.removeNode((Node) this.getComponentAt(e.getPoint()));
                 this.focusedComponent = null;
-                // this.remove(this.getComponentAt(e.getPoint()));
                 break;
 
-            case 'd': //disconnect
-                if(!(this.focusedComponent instanceof Node)){
+            case 'd': // disconnect
+                if (!(this.focusedComponent instanceof Node)) {
                     this.focusedComponent = this.getComponentAt(e.getPoint());
                     return;
                 }
 
                 Component nextComponent2 = this.getComponentAt(e.getPoint());
-                
-                if((nextComponent2 instanceof Node) && nextComponent2 != this.focusedComponent){
+
+                if ((nextComponent2 instanceof Node) && nextComponent2 != this.focusedComponent) {
                     this.disconnectNode((Node) this.focusedComponent, (Node) nextComponent2);
                     this.setFocusedComponent(null);
                 }
                 break;
-        
-            }
+
+        }
     }
 
     public void connectNode(Node obj1, Node obj2) {
@@ -113,12 +136,13 @@ public class Graph extends JPanel implements KeyListener, MouseListener, MouseMo
         Set<Node> edge = new HashSet<>(2);
         edge.add(obj1);
         edge.add(obj2);
-        this.edges.remove(edge);        
+        this.edges.remove(edge);
     }
 
     public void insertNode(Node n) {
         this.nodes.add(n);
         this.add(n);
+        this.validate();
         this.size++;
     }
 
@@ -128,125 +152,211 @@ public class Graph extends JPanel implements KeyListener, MouseListener, MouseMo
         this.size--;
         LinkedList<Node> adjacentNodes = n.getConnectedNodes();
 
-        if(adjacentNodes == null) return;
-        for(Node node : adjacentNodes){
+        if (adjacentNodes == null)
+            return;
+        for (Node node : adjacentNodes) {
             this.disconnectNode(n, node);
         }
 
     }
-    
-    
+
     public void paint(Graphics g) {
-        
-        
-        //Set anti-aliasing
-        Graphics2D g2 = (Graphics2D)g;
+
+        // Set anti-aliasing
+        Graphics2D g2 = (Graphics2D) g;
         RenderingHints rh = new RenderingHints(
-                 RenderingHints.KEY_ANTIALIASING,
-                 RenderingHints.VALUE_ANTIALIAS_ON);
+                RenderingHints.KEY_ANTIALIASING,
+                RenderingHints.VALUE_ANTIALIAS_ON);
         g2.setRenderingHints(rh);
 
         this.paintComponent(g2);
 
-        if(!this.edges.isEmpty()){
+        if (!this.edges.isEmpty()) {
             // Draw edges
             g2.setStroke(new BasicStroke(2));
-            for(Set<Node> sets : this.edges){
+            for (Set<Node> sets : this.edges) {
                 Node obj1, obj2;
                 Iterator<Node> it = sets.iterator();
 
                 obj1 = (Node) it.next();
                 obj2 = (Node) it.next();
-                g2.drawLine(obj1.getX() + obj1.getRadius(), obj1.getY() + obj1.getRadius(), obj2.getX() + obj2.getRadius(), obj2.getY() + obj2.getRadius());
+                g2.drawLine(obj1.getX() + obj1.getRadius(), obj1.getY() + obj1.getRadius(),
+                        obj2.getX() + obj2.getRadius(), obj2.getY() + obj2.getRadius());
             }
-        }  
+        }
 
-        if(this.mode.equals("Edit") && this.latestKeyPressed == 'c' && this.focusedComponent instanceof Node){ 
+        g2.setStroke(new BasicStroke(1));
+        if (this.mode.equals("Edit") && this.latestKeyPressed == 'c' && this.focusedComponent instanceof Node) {
             Node node = (Node) this.focusedComponent;
             Point centerPoint = node.getCenterPoint();
             g2.drawLine(centerPoint.x, centerPoint.y, this.mouseLocation.x, this.mouseLocation.y);
         }
+        // g2.setStroke(new BasicStroke(2));
         // Draw components including nodes
         // super.paint(g2);
         this.paintChildren(g2);
 
         this.repaint();
 
-    //     // g.drawRect(0, 0, 50, 50);
-    //     // g.fillArc(50, 50, 50, 50, 0, 170);
+        // // g.drawRect(0, 0, 50, 50);
+        // // g.fillArc(50, 50, 50, 50, 0, 170);
 
-    //     Graphics2D g2D = (Graphics2D) g;
-    //     g2D.setStroke(new BasicStroke(2));
+        // Graphics2D g2D = (Graphics2D) g;
+        // g2D.setStroke(new BasicStroke(2));
 
-    //     for(Node n : nodes){
-    //         g2D.setColor(Color.WHITE);
-    //         g2D.fillOval(n.getX(), n.getY(), n.getRadius()*2, n.getRadius()*2);
+        // for(Node n : nodes){
+        // g2D.setColor(Color.WHITE);
+        // g2D.fillOval(n.getX(), n.getY(), n.getRadius()*2, n.getRadius()*2);
 
-    //         g2D.setColor(Color.BLACK);
-    //         g2D.drawOval(n.getX(), n.getY(), n.getRadius()*2, n.getRadius()*2);
-    //     }
+        // g2D.setColor(Color.BLACK);
+        // g2D.drawOval(n.getX(), n.getY(), n.getRadius()*2, n.getRadius()*2);
+        // }
     }
 
     private void updateLabel() {
         this.modeLabel.setText("Mode: " + this.mode);
+        this.actionLabel.setText("Action: " + (this.action == null ? "None" : this.action));
     }
 
     private void setFocusedComponent(Component c) {
         this.focusedComponent = c;
     }
 
+    private void setTargetFile() {
+        JFileChooser fileChooser = new JFileChooser();
+        if (fileChooser.showOpenDialog(fileChooser) == JFileChooser.APPROVE_OPTION) {
+            this.targetFile = new File(fileChooser.getSelectedFile().getAbsolutePath());
+            System.out.println(this.targetFile);
+        }
+    }
+
+    private void setAction(String action) {
+        this.action = action;
+        this.updateLabel();
+    }
+
     private void saveProc() {
+        if (this.targetFile == null)
+            setTargetFile();
+
+        System.out.println("saving");
         try {
-            FileWriter writer = new FileWriter("./test/poem.txt");
-            writer.write("lll");
+            BufferedWriter writer = new BufferedWriter(new FileWriter("./test/save.dat"));
+            writer.write(this.size + "\n");
+
+            for (Node node : this.nodes) {
+                writer.write((node.getX() + node.getRadius()) + " " + (node.getY() + node.getRadius()) + " "
+                        + node.getRadius() + " " + node.getIdentifier() + "\n");
+            }
+
+            for (Set<Node> sets : this.edges) {
+                Node obj1, obj2;
+                Iterator<Node> it = sets.iterator();
+
+                obj1 = (Node) it.next();
+                obj2 = (Node) it.next();
+                writer.write(this.nodes.indexOf(obj1) + " " + this.nodes.indexOf(obj2) + "\n");
+            }
+
             writer.close();
         } catch (IOException e) {
             // TODO: handle exception
+            e.printStackTrace();
+        }
+    }
+
+    private void loadProc() {
+        this.reset();
+
+        if (this.targetFile == null)
+            setTargetFile();
+
+        try {
+            BufferedReader reader = new BufferedReader(new FileReader(this.targetFile));
+            int loadSize = Integer.parseInt(reader.readLine());
+            for (int i = 0; i < loadSize; i++) {
+                String[] nodeData = reader.readLine().split(" ");
+                int x = Integer.parseInt(nodeData[0]);
+                int y = Integer.parseInt(nodeData[1]);
+                int radius = Integer.parseInt(nodeData[2]);
+                String identifier = nodeData[3];
+                this.insertNode(new Node(new Point(x, y), radius, identifier));
+            }
+            String line;
+
+            while ((line = reader.readLine()) != null) {
+                String[] nodeConnection = line.split(" ");
+                int node1 = Integer.parseInt(nodeConnection[0]);
+                int node2 = Integer.parseInt(nodeConnection[1]);
+                this.connectNode(this.nodes.get(node1), this.nodes.get(node2));
+            }
+
+            reader.close();
+        } catch (IOException e) {
+            // TODO: handle exception
+            e.printStackTrace();
         }
     }
 
     @Override
     public void keyTyped(KeyEvent e) {
         // TODO Auto-generated method stub
-        // System.out.println(e.getKeyCode());
-        // System.out.println(this.mode + " " + e.getKeyChar());
-        switch(this.mode){
-            case "Edit": 
-                // System.out.println("hhh");
-                switch(Character.toLowerCase(e.getKeyChar())){
+        System.out.println(e.getKeyCode());
+        System.out.println(this.mode + " " + e.getKeyChar());
+        switch (this.mode) {
+            case "Edit":
+                switch (Character.toLowerCase(e.getKeyChar())) {
                     case 'a':
                         this.insertNode(new Node(this.mouseLocation));
                         break;
-                    
+
+                    case 'c':
+                        this.setAction("Connect");
+                        break;
+
+                    case 'r':
+                        this.setAction("Remove");
+                        break;
+
+                    case 'd':
+                        this.setAction("Disconnect");
+                        break;
+
                 }
                 break;
-            
+
         }
-        
+        this.updateLabel();
+
     }
 
     @Override
     public void keyPressed(KeyEvent e) {
         // TODO Auto-generated method stub
-        // throw new UnsupportedOperationException("Unimplemented method 'keyPressed'");
         this.latestKeyPressed = e.getKeyChar();
         this.focusedComponent = null;
-
+        this.setAction(null);
         System.out.println(e.getKeyCode() + " " + e.getModifiersEx());
-        if(e.getModifiersEx() == 128){ //ctrl
-            switch (e.getKeyCode()){
-                case 69: //e
+        if (e.getModifiersEx() == 128) { // ctrl
+            switch (e.getKeyCode()) {
+                case 69: // e
                     this.mode = "Edit";
-                    for(Node node : this.nodes){
-                        // node.
-                    }
                     break;
-                
-                case 77: //m
+
+                case 70: // f
+                    this.setTargetFile();
+                    break;
+
+                case 77: // m
                     this.mode = "Move";
                     break;
 
-                case 83: //s
+                case 76: // l
+                    this.loadProc();
+                    ;
+                    break;
+
+                case 83: // s
                     this.saveProc();
                     break;
             }
@@ -259,33 +369,18 @@ public class Graph extends JPanel implements KeyListener, MouseListener, MouseMo
     @Override
     public void keyReleased(KeyEvent e) {
         // TODO Auto-generated method stub
-        // throw new UnsupportedOperationException("Unimplemented method 'keyReleased'");
     }
-
-    // private class EditClickListener extends MouseAdapter {
-    //     @Override
-    //     public void mousePressed(MouseEvent e) {
-    //         // TODO Auto-generated method stub
-            
-    //         System.out.println(size);
-    //     }
-    // }
 
     @Override
     public void mouseClicked(MouseEvent e) {
         // TODO Auto-generated method stub
-        // JPanel node = (JPanel) e.getSource();
-        // if(node != null) System.out.println("lll");
-        
     }
 
     @Override
     public void mousePressed(MouseEvent e) {
-        switch(this.mode){
+        switch (this.mode) {
             case "Move":
-                // this.focusedNode = (Node) e.getSource();
                 this.setFocusedComponent(this.getComponentAt(e.getPoint()));
-                // System.out.println(e.get);
                 int screenX = e.getXOnScreen();
                 int screenY = e.getYOnScreen();
 
@@ -299,48 +394,46 @@ public class Graph extends JPanel implements KeyListener, MouseListener, MouseMo
                 break;
 
         }
-        
+
     }
 
     @Override
     public void mouseReleased(MouseEvent e) {
         // TODO Auto-generated method stub
-        // throw new UnsupportedOperationException("Unimplemented method 'mouseReleased'");
     }
 
     @Override
     public void mouseEntered(MouseEvent e) {
         // TODO Auto-generated method stub
-        // throw new UnsupportedOperationException("Unimplemented method 'mouseEntered'");
     }
 
     @Override
     public void mouseExited(MouseEvent e) {
         // TODO Auto-generated method stub
-        // throw new UnsupportedOperationException("Unimplemented method 'mouseExited'");
     }
 
     @Override
     public void mouseDragged(MouseEvent e) {
         // TODO Auto-generated method stub
-        // throw new UnsupportedOperationException("Unimplemented method 'mouseDragged'");
-        switch(this.mode){
+        switch (this.mode) {
             case "Move":
-            if(!(this.focusedComponent instanceof Node)) return;
-            int screenX = e.getXOnScreen();
-            int screenY = e.getYOnScreen();
+                if (!(this.focusedComponent instanceof Node))
+                    return;
+                int screenX = e.getXOnScreen();
+                int screenY = e.getYOnScreen();
 
-            int dx = screenX - (int) prevPt.getX();
-            int dy = screenY - (int) prevPt.getY();
-            
-            System.out.println(dx + " " + dy);
+                int dx = screenX - (int) prevPt.getX();
+                int dy = screenY - (int) prevPt.getY();
 
-            Node targetNode = (Node) this.focusedComponent;
+                System.out.println(dx + " " + dy);
 
-            targetNode.setLocation(Math.max(targetNode.getBounds().x + dx, 0), Math.max(targetNode.getBounds().y + dy, 0));
-            
-            prevPt = new Point((int) prevPt.getX() + dx, (int) prevPt.getY() + dy);
-            break;
+                Node targetNode = (Node) this.focusedComponent;
+
+                targetNode.setLocation(Math.max(targetNode.getBounds().x + dx, 0),
+                        Math.max(targetNode.getBounds().y + dy, 0));
+
+                prevPt = new Point((int) prevPt.getX() + dx, (int) prevPt.getY() + dy);
+                break;
         }
     }
 
@@ -348,6 +441,5 @@ public class Graph extends JPanel implements KeyListener, MouseListener, MouseMo
     public void mouseMoved(MouseEvent e) {
         this.mouseLocation = new Point(e.getX(), e.getY());
         // TODO Auto-generated method stub
-        // throw new UnsupportedOperationException("Unimplemented method 'mouseMoved'");
     }
 }
