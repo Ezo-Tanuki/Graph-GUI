@@ -123,6 +123,8 @@ public class Graph extends JPanel implements KeyListener, MouseListener, MouseMo
     }
 
     public void connectNode(Node obj1, Node obj2) {
+        if(obj1 == obj2) return;
+
         obj1.addConnection(obj2);
         obj2.addConnection(obj1);
 
@@ -137,6 +139,8 @@ public class Graph extends JPanel implements KeyListener, MouseListener, MouseMo
         edge.add(obj1);
         edge.add(obj2);
         this.edges.remove(edge);
+        obj1.removeConnection(obj2);
+        obj2.removeConnection(obj1);
     }
 
     public void insertNode(Node n) {
@@ -150,11 +154,15 @@ public class Graph extends JPanel implements KeyListener, MouseListener, MouseMo
         this.nodes.remove(n);
         this.remove(n);
         this.size--;
-        LinkedList<Node> adjacentNodes = n.getConnectedNodes();
+        Node.removeDefaultNumber(n.getIdentifier());
 
-        if (adjacentNodes == null)
+        ArrayList<Node> adjacentNodes = new ArrayList<>(n.getConnectedNodes());
+
+        if (adjacentNodes.isEmpty())
             return;
+
         for (Node node : adjacentNodes) {
+            System.out.println(node.getIdentifier());
             this.disconnectNode(n, node);
         }
 
@@ -307,7 +315,7 @@ public class Graph extends JPanel implements KeyListener, MouseListener, MouseMo
             case "Edit":
                 switch (Character.toLowerCase(e.getKeyChar())) {
                     case 'a':
-                        this.insertNode(new Node(this.mouseLocation));
+                        this.insertNode(new Node((Point) (this.mouseLocation.clone())));
                         break;
 
                     case 'c':

@@ -7,22 +7,27 @@ import java.awt.Graphics2D;
 import java.awt.Point;
 import java.awt.RenderingHints;
 import java.util.LinkedList;
-import java.util.Set;
-import java.util.TreeSet;
 
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
 public class Node extends JPanel{
-    private static Set<Integer> defaultNumber;   
+    private static LinkedList<Integer> defaultNumber;   
     
     static {
-        defaultNumber = new TreeSet<>();
+        defaultNumber = new LinkedList<>();
+    }
+
+    public static void removeDefaultNumber(String x){
+        try {
+            int number = Integer.parseInt(x);
+            defaultNumber.remove(Integer.valueOf(number));
+        } catch (NumberFormatException e) {
+            System.out.println("Identifier is not a number");
+        }
     }
 
     Point prevPt;
-
-
 
     private int radius;
     private int margin;
@@ -66,6 +71,8 @@ public class Node extends JPanel{
         }
 
         pt.translate(-radius, -radius);
+        pt.x = Math.max(pt.x, 0);
+        pt.y = Math.max(pt.y, 0);
 
         this.setRadius(radius);
         this.setOpaque(false);
@@ -168,5 +175,9 @@ public class Node extends JPanel{
 
     public void addConnection(Node n) {
         this.connectedNodes.add(n);
+    }
+
+    public void removeConnection(Node n) {
+        this.connectedNodes.remove(n);
     }
 }
