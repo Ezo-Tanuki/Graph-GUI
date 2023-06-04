@@ -122,7 +122,8 @@ public class Graph extends JPanel implements KeyListener, MouseListener, MouseMo
     }
 
     public void connectNode(Node obj1, Node obj2) {
-        if(obj1 == obj2) return;
+        if (obj1 == obj2)
+            return;
 
         obj1.addConnection(obj2);
         obj2.addConnection(obj1);
@@ -198,26 +199,10 @@ public class Graph extends JPanel implements KeyListener, MouseListener, MouseMo
             Point centerPoint = node.getCenterPoint();
             g2.drawLine(centerPoint.x, centerPoint.y, this.mouseLocation.x, this.mouseLocation.y);
         }
-        // g2.setStroke(new BasicStroke(2));
-        // Draw components including nodes
-        // super.paint(g2);
+
         this.paintChildren(g2);
 
         this.repaint();
-
-        // // g.drawRect(0, 0, 50, 50);
-        // // g.fillArc(50, 50, 50, 50, 0, 170);
-
-        // Graphics2D g2D = (Graphics2D) g;
-        // g2D.setStroke(new BasicStroke(2));
-
-        // for(Node n : nodes){
-        // g2D.setColor(Color.WHITE);
-        // g2D.fillOval(n.getX(), n.getY(), n.getRadius()*2, n.getRadius()*2);
-
-        // g2D.setColor(Color.BLACK);
-        // g2D.drawOval(n.getX(), n.getY(), n.getRadius()*2, n.getRadius()*2);
-        // }
     }
 
     private void updateLabel() {
@@ -244,7 +229,7 @@ public class Graph extends JPanel implements KeyListener, MouseListener, MouseMo
 
     private void saveProc() {
         if (this.targetFile == null)
-            setTargetFile();
+            this.setTargetFile();
 
         System.out.println("saving");
         try {
@@ -276,7 +261,7 @@ public class Graph extends JPanel implements KeyListener, MouseListener, MouseMo
         this.reset();
 
         if (this.targetFile == null)
-            setTargetFile();
+            this.setTargetFile();
 
         try {
             BufferedReader reader = new BufferedReader(new FileReader(this.targetFile));
