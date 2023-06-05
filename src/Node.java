@@ -11,14 +11,18 @@ import java.util.LinkedList;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
-public class Node extends JPanel{
-    private static LinkedList<Integer> defaultNumber;   
-    
+public class Node extends JPanel {
+    private static LinkedList<Integer> defaultNumber;
+
     static {
         defaultNumber = new LinkedList<>();
     }
 
-    public static void removeDefaultNumber(String x){
+    public static void resetDefaultNumber() {
+        defaultNumber.clear();
+    }
+
+    public static void removeDefaultNumber(String x) {
         try {
             int number = Integer.parseInt(x);
             defaultNumber.remove(Integer.valueOf(number));
@@ -38,7 +42,7 @@ public class Node extends JPanel{
     private int borderThickness;
 
     private String identifier;
-    
+
     private LinkedList<Node> connectedNodes;
 
     public Node() {
@@ -50,9 +54,9 @@ public class Node extends JPanel{
     }
 
     public Node(Point pt, int radius, String identifier) {
-        if(identifier == null){
-            for(int i = 0; i < Integer.MAX_VALUE; i++){
-                if(!defaultNumber.contains(i)){
+        if (identifier == null) {
+            for (int i = 0; i < Integer.MAX_VALUE; i++) {
+                if (!defaultNumber.contains(i)) {
                     identifier = Integer.toString(i);
                     defaultNumber.add(i);
                     break;
@@ -60,7 +64,7 @@ public class Node extends JPanel{
             }
         }
 
-        else{
+        else {
             identifier = identifier.strip();
             try {
                 int number = Integer.parseInt(identifier);
@@ -81,38 +85,37 @@ public class Node extends JPanel{
 
         this.setIdentifier(identifier);
 
-
         this.margin = Math.max(radius / 20, 3);
         this.setLocation(pt);
-        this.setSize(this.radius * 2 + this.margin, this.radius * 2 + this.margin);  
-        
+        this.setSize(this.radius * 2 + this.margin, this.radius * 2 + this.margin);
+
         JLabel label = new JLabel();
- 
+
         label.setHorizontalAlignment(JLabel.CENTER);
         label.setVerticalAlignment(JLabel.CENTER);
-        this.setVisible(true);     
-        label.setText(this.identifier);   
-        label.setFont(new Font("Verdana", Font.PLAIN, this.radius * 3/5)); //0.6 * radius
-        this.add(label);   
+        this.setVisible(true);
+        label.setText(this.identifier);
+        label.setFont(new Font("Verdana", Font.PLAIN, this.radius * 3 / 5)); // 0.6 * radius
+        this.add(label);
     }
 
     public void paint(Graphics g) {
-        //Set anti-aliasing to on
-        Graphics2D g2D = (Graphics2D)g;
+        // Set anti-aliasing to on
+        Graphics2D g2D = (Graphics2D) g;
         RenderingHints rh = new RenderingHints(
-                 RenderingHints.KEY_ANTIALIASING,
-                 RenderingHints.VALUE_ANTIALIAS_ON);
+                RenderingHints.KEY_ANTIALIASING,
+                RenderingHints.VALUE_ANTIALIAS_ON);
         g2D.setRenderingHints(rh);
 
-        //Set stroke
+        // Set stroke
         g2D.setStroke(new BasicStroke(2));
         g2D.setBackground(Color.BLUE);
 
-        //Set fill color
+        // Set fill color
         g2D.setColor(Color.WHITE);
         g2D.fillOval(this.margin / 2, this.margin / 2, this.getRadius() * 2, this.getRadius() * 2);
 
-        //Set border color
+        // Set border color
         g2D.setColor(Color.BLACK);
         g2D.drawOval(this.margin / 2, this.margin / 2, this.getRadius() * 2, this.getRadius() * 2);
 

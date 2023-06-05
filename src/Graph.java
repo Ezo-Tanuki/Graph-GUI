@@ -76,9 +76,11 @@ public class Graph extends JPanel implements KeyListener, MouseListener, MouseMo
             this.remove(node);
         }
 
-        this.nodes = new ArrayList<>(20);
+        Node.resetDefaultNumber();
+
+        this.nodes.clear();
         this.size = 0;
-        this.edges = new HashSet<>();
+        this.edges.clear();;
     }
 
     public void editMode(MouseEvent e) {
@@ -216,7 +218,7 @@ public class Graph extends JPanel implements KeyListener, MouseListener, MouseMo
 
     private void setTargetFile() {
         JFileChooser fileChooser = new JFileChooser();
-        if (fileChooser.showOpenDialog(fileChooser) == JFileChooser.APPROVE_OPTION) {
+        if (fileChooser.showSaveDialog(fileChooser) == JFileChooser.APPROVE_OPTION) {
             this.targetFile = new File(fileChooser.getSelectedFile().getAbsolutePath());
             System.out.println(this.targetFile);
         }
