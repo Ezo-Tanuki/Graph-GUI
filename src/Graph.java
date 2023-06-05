@@ -80,7 +80,8 @@ public class Graph extends JPanel implements KeyListener, MouseListener, MouseMo
 
         this.nodes.clear();
         this.size = 0;
-        this.edges.clear();;
+        this.edges.clear();
+        ;
     }
 
     public void editMode(MouseEvent e) {
@@ -216,12 +217,15 @@ public class Graph extends JPanel implements KeyListener, MouseListener, MouseMo
         this.focusedComponent = c;
     }
 
-    private void setTargetFile() {
+    private boolean setTargetFile() {
         JFileChooser fileChooser = new JFileChooser();
         if (fileChooser.showSaveDialog(fileChooser) == JFileChooser.APPROVE_OPTION) {
             this.targetFile = new File(fileChooser.getSelectedFile().getAbsolutePath());
             System.out.println(this.targetFile);
+            return true;
         }
+
+        return false;
     }
 
     private void setAction(String action) {
@@ -229,9 +233,10 @@ public class Graph extends JPanel implements KeyListener, MouseListener, MouseMo
         this.updateLabel();
     }
 
-    private void saveProc() {
+    private boolean saveProc() {
         if (this.targetFile == null)
-            this.setTargetFile();
+            if (!this.setTargetFile())
+                return false;
 
         System.out.println("saving");
         try {
@@ -256,14 +261,19 @@ public class Graph extends JPanel implements KeyListener, MouseListener, MouseMo
         } catch (IOException e) {
             // TODO: handle exception
             e.printStackTrace();
+            return false;
         }
+
+        return true;
     }
 
-    private void loadProc() {
-        this.reset();
+    private boolean loadProc() {
 
         if (this.targetFile == null)
-            this.setTargetFile();
+            if (!this.setTargetFile())
+                return false;
+
+        this.reset();
 
         try {
             BufferedReader reader = new BufferedReader(new FileReader(this.targetFile));
@@ -289,7 +299,10 @@ public class Graph extends JPanel implements KeyListener, MouseListener, MouseMo
         } catch (IOException e) {
             // TODO: handle exception
             e.printStackTrace();
+            return false;
         }
+
+        return true;
     }
 
     @Override
@@ -346,12 +359,15 @@ public class Graph extends JPanel implements KeyListener, MouseListener, MouseMo
                     break;
 
                 case 76: // l
-                    this.loadProc();
+                    if (!this.loadProc())
+                        System.out.println("Save failed!");
                     ;
                     break;
 
                 case 83: // s
-                    this.saveProc();
+                    if (!this.saveProc())
+                        System.out.println("Load failed!");
+                    ;
                     break;
             }
             System.out.println("Mode set to " + this.mode);
