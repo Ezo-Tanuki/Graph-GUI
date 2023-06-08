@@ -233,7 +233,7 @@ public class Graph extends JPanel implements KeyListener, MouseListener, MouseMo
 
         System.out.println("saving");
         try {
-            BufferedWriter writer = new BufferedWriter(new FileWriter("./test/save.dat"));
+            BufferedWriter writer = new BufferedWriter(new FileWriter(this.targetFile));
             writer.write(this.size + "\n");
 
             for (Node node : this.nodes) {
