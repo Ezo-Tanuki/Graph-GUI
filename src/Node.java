@@ -31,8 +31,6 @@ public class Node extends JPanel {
         }
     }
 
-    Point prevPt;
-
     private int radius;
     private int margin;
 
