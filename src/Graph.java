@@ -55,7 +55,7 @@ public class Graph extends JPanel implements KeyListener, MouseListener, MouseMo
         this.modeLabel.setBounds(10, 10, 150, 10);
 
         this.action = null;
-        this.actionLabel = new JLabel("Action: " + (this.action == null ? "None" : this.action));
+        this.actionLabel = new JLabel("Action: None");
         this.actionLabel.setBounds(10, 25, 150, 10);
 
         this.setLayout(null);
