@@ -222,6 +222,15 @@ public class Graph extends JPanel implements KeyListener, MouseListener, MouseMo
         if (fileChooser.showSaveDialog(fileChooser) == JFileChooser.APPROVE_OPTION) {
             this.targetFile = new File(fileChooser.getSelectedFile().getAbsolutePath());
             System.out.println(this.targetFile);
+            if(!this.targetFile.exists()){
+                try {
+                    this.targetFile.createNewFile();
+                } catch (Exception e) {
+                    // TODO: handle exception
+                    return false;
+                }
+                
+            }
             return true;
         }
 
